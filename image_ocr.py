@@ -60,7 +60,18 @@ OUTPUT_DIR = 'image_ocr'
 
 np.random.seed(55)
 
+def dataset_load(path):
+    if path.endswith(".gz"):
+        f=gzip.open(path,'rb')
+    else:
+        f=open(path,'rb')
 
+    if sys.version_info<(3,):
+        data=cPickle.load(f)
+    else:
+        data=cPickle.load(f,encoding="bytes")
+    f.close()
+    return data
 bind = {}
 C = 0
 banglachars = "অআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়0"
@@ -288,6 +299,7 @@ def train(run_name, start_epoch, stop_epoch, img_w):
               'label_length': test_input_length,
               'source_str':test_source_str
               }
+    image_gen=inputs_2
     viz_cb = OwnVizCallback(run_name, test_func, image_gen)
    
     for i in range(1000,1010):
@@ -295,11 +307,11 @@ def train(run_name, start_epoch, stop_epoch, img_w):
         print(y_train[i])
         print(X_train[i])
         print(train_input_length)
-        
-    # model.fit([np.array(X_train),np.array(y_train),np.array(train_input_length),np.array(train_labels_length)],
-    #     outputs_1, batch_size=28, epochs=120, verbose=1,callbacks=[viz_cb],
-    #     validation_data=([np.array(X_test),np.array(y_test),np.array(test_input_length),np.array(test_labels_length)]
-    #         ,outputs_2))
+
+    model.fit([np.array(X_train),np.array(y_train),np.array(train_input_length),np.array(train_labels_length)],
+        outputs_1, batch_size=28, epochs=120, verbose=1,callbacks=[viz_cb],
+        validation_data=([np.array(X_test),np.array(y_test),np.array(test_input_length),np.array(test_labels_length)]
+            ,outputs_2))
 
 
 if __name__ == '__main__':
