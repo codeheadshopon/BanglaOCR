@@ -47,8 +47,6 @@ from keras.layers.recurrent import GRU
 from keras.optimizers import SGD
 from keras.utils.data_utils import get_file
 from keras.preprocessing import image
-from attention import SpatialTransformer, ST2
-from spatiallayer import *
 
 import matplotlib.pyplot as plt
 import keras.callbacks
@@ -290,16 +288,18 @@ def train(run_name, start_epoch, stop_epoch, img_w):
               'label_length': test_input_length,
               'source_str':test_source_str
               }
-    image_gen=inputs_2
-    print(image_gen['the_input'].shape)
     viz_cb = OwnVizCallback(run_name, test_func, image_gen)
-    for i in range(len(X_test)):
-        if(test_labels_length[i]==0):
-            print(i)
-    model.fit([np.array(X_train),np.array(y_train),np.array(train_input_length),np.array(train_labels_length)],
-        outputs_1, batch_size=28, epochs=120, verbose=1,callbacks=[viz_cb],
-        validation_data=([np.array(X_test),np.array(y_test),np.array(test_input_length),np.array(test_labels_length)]
-            ,outputs_2))
+   
+    for i in range(1000,1010):
+        print(train_labels_length[i])
+        print(y_train[i])
+        print(X_train[i])
+        print(train_input_length)
+        
+    # model.fit([np.array(X_train),np.array(y_train),np.array(train_input_length),np.array(train_labels_length)],
+    #     outputs_1, batch_size=28, epochs=120, verbose=1,callbacks=[viz_cb],
+    #     validation_data=([np.array(X_test),np.array(y_test),np.array(test_input_length),np.array(test_labels_length)]
+    #         ,outputs_2))
 
 
 if __name__ == '__main__':
