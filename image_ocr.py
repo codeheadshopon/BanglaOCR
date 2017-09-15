@@ -538,4 +538,4 @@ if __name__ == '__main__':
     run_name = datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S')
     train(run_name, 0, 20, 128)
     # increase to wider images and start at epoch 20. The learned weights are reloaded
-train(run_name, 20, 25, 512)
+# train(run_name, 20, 25, 512)
