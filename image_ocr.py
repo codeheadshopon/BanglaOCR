@@ -1,31 +1,5 @@
 # coding=utf8
-'''This example uses a convolutional stack followed by a recurrent stack
-and a CTC logloss function to perform optical character recognition
-of generated text images. I have no evidence of whether it actually
-learns general shapes of text, or just is able to recognize all
-the different fonts thrown at it...the purpose is more to demonstrate CTC
-inside of Keras.  Note that the font list may need to be updated
-for the particular OS in use.
-This starts off with 4 letter words.  For the first 12 epochs, the
-difficulty is gradually increased using the TextImageGenerator class
-which is both a generator class for test/train data and a Keras
-callback class. After 20 epochs, longer sequences are thrown at it
-by recompiling the model to handle a wider image and rebuilding
-the word list to include two words separated by a space.
-The table below shows normalized edit distance values. Theano uses
-a slightly different CTC implementation, hence the different results.
-            Norm. ED
-Epoch |   TF   |   TH
-------------------------
-    10   0.027   0.064
-    15   0.038   0.035
-    20   0.043   0.045
-    25   0.014   0.019
-This requires cairo and editdistance packages:
-pip install cairocffi
-pip install editdistance
-Created by Mike Henry
-https://github.com/mbhenry/
+
 '''
 import os
 import itertools
@@ -96,9 +70,10 @@ def paint_text(text, w, h, rotate=False, ud=False, multi_fonts=False):
                                      np.random.choice([cairo.FONT_WEIGHT_BOLD, cairo.FONT_WEIGHT_NORMAL]))
         else:
             context.select_font_face('SolaimanLipi', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-        context.set_font_size(25)
+        context.set_font_size(15)
         box = context.text_extents(text)
         border_w_h = (4, 4)
+        # print(text)
         if box[2] > (w - 2 * border_w_h[1]) or box[3] > (h - 2 * border_w_h[0]):
             raise IOError('Could not fit string into image. Max char count is too large for given image width.')
 
@@ -148,11 +123,62 @@ def shuffle_mats_or_lists(matrix_list, stop_ind=None):
             raise TypeError('`shuffle_mats_or_lists` only supports '
                             'numpy.array and list objects.')
     return ret
-
-
+# "কাখাগাঘাচাছাজাঝাটাঠাডাঢাণাতাথাদাথাদাধানাপাফাবাভামাযারালাশাষাসাহাড়াঢ়ায়া"
+dict = {'অ': 0,
+        'আ':1,
+        'ই':2,
+        'ঈ':3 ,
+        'উ':4 ,
+        'ঊ':5 ,
+        'ঋ':6 ,
+        'এ':7 ,
+        'ঐ':8 ,
+        'ও':9 ,
+        'ঔ':10 ,
+        'ক':11,
+        'খ':12 ,
+        'গ':13 ,
+        'ঘ':14 ,
+        'ঙ':15 ,
+        'চ':16 ,
+        'ছ':17 ,
+        'জ':18 ,
+        'ঝ':19 ,
+        'ঞ':20 ,
+        'ট':21,
+        'ঠ':22 ,
+        'ড':23 ,
+        'ঢ':24 ,
+        'ণ':25 ,
+        'ত':26 ,
+        'থ':27 ,
+        'দ':28 ,
+        'ধ':29 ,
+        'ন':30 ,
+        'প':31 ,
+        'ফ':32 ,
+        'ব':33 ,
+        'ভ':34 ,
+        'ম':35 ,
+        'য':36 ,
+        'র':37 ,
+        'ল':38 ,
+        'শ':39 ,
+        'ষ':40 ,
+        'স':41 ,
+        'হ':42 ,
+        'ড়':43 ,
+        'ঢ়':44 ,
+        'য়':45,
+        'া':46,
+        'ে':47,
+        'ি':48,
+        'ী':49,
+        'ু':50
+       }
 bind = {}
 C = 0
-banglachars = "অআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য় "
+banglachars = "অআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহড়ঢ়য়   া   ে   ি   ী   ু"
 print("Charlen",len(banglachars))
 for i in banglachars.decode('utf-8'):
     # print(C)
@@ -162,10 +188,11 @@ for i in banglachars.decode('utf-8'):
 def text_to_labels(text, num_classes):
     ret = []
     # print(text)
-    for l in text.decode('utf-8'):
-        for i in range(0, 47):
-            if (bind[i] == l):
-                ret.append(i)
+    v=""
+    for i in range(0,len(text),3):
+        v=text[i:i+3]
+        # print(dict[v])
+        ret.append(dict[v])
     # print(ret)
     return ret
 
@@ -185,7 +212,7 @@ class TextImageGenerator(keras.callbacks.Callback):
 
     def __init__(self, monogram_file, bigram_file, minibatch_size,
                  img_w, img_h, downsample_factor, val_split,
-                 absolute_max_string_len=16):
+                 absolute_max_string_len=18):
 
         self.minibatch_size = minibatch_size
         self.img_w = img_w
@@ -198,7 +225,7 @@ class TextImageGenerator(keras.callbacks.Callback):
         self.absolute_max_string_len = absolute_max_string_len
 
     def get_output_size(self):
-        return 47
+        return 52
 
     # num_words can be independent of the epoch size due to the use of generators
     # as max_string_len grows, num_words can grow
@@ -215,14 +242,20 @@ class TextImageGenerator(keras.callbacks.Callback):
         self.Y_len = [0] * self.num_words
 
         # monogram file is sorted by frequency in english speech
+        C=0
         with open(self.monogram_file, 'rt') as f:
             for line in f:
-                if len(tmp_string_list) == int(self.num_words * mono_fraction):
-                    break
+                # print(max_string_len)
+                # if len(tmp_string_list) == int(self.num_words * mono_fraction):
+                #     break
                 word = line.rstrip()
-                if max_string_len == -1 or max_string_len is None or len(word) <= max_string_len:
-                    tmp_string_list.append(word)
+                # if max_string_len == -1 or max_string_len is None or len(word)//3 +1 <= max_string_len:
+                
+                tmp_string_list.append(word)
 
+                C+=1
+                if(C==8000):
+                    break
         # # bigram file contains common word pairings in english speech
         # with open(self.bigram_file, 'rt') as f:
         #     lines = f.readlines()
@@ -234,6 +267,10 @@ class TextImageGenerator(keras.callbacks.Callback):
         #         if is_valid_str(word) and \
         #                 (max_string_len == -1 or max_string_len is None or len(word) <= max_string_len):
         #             tmp_string_list.append(word)
+        # print(len(tmp_string_list))
+        # print(self.num_words)
+        # print(len(tmp_string_list)," - ",self.num_words)
+
         if len(tmp_string_list) != self.num_words:
             raise IOError('Could not pull enough words from supplied monogram and bigram files. ')
         # interlace to mix up the easy and hard words
@@ -242,11 +279,11 @@ class TextImageGenerator(keras.callbacks.Callback):
 
         for i, word in enumerate(self.string_list):
             self.Y_len[i] = len(word)//3
+            # print((self.Y_len[i]))
+
+            self.Y_data[i, 0:(len(word)//3 )] = text_to_labels(word, self.get_output_size())
             # print(word)
-            # print(len(word))
-            # print(word)
-            # print(i)
-            self.Y_data[i, 0:len(word)] = text_to_labels(word, self.get_output_size())
+            # print(self.Y_data[i, 0:(len(word)//3 )])
             # print(self.Y_data[i,0:len(word)])
             self.X_text.append(word)
 
@@ -352,7 +389,7 @@ class TextImageGenerator(keras.callbacks.Callback):
             self.paint_func = lambda text: paint_text(text, self.img_w, self.img_h,
                                                       rotate=True, ud=True, multi_fonts=True)
         if epoch >= 21 and self.max_string_len < 12:
-            self.build_word_list(16000, 12, 0.5)
+            self.build_word_list(8000, 12, 0.5)
 
 
 # the actual loss calc occurs here despite it not being
@@ -500,7 +537,7 @@ def train(run_name, start_epoch, stop_epoch, img_w):
     inner = Dense(img_gen.get_output_size(), kernel_initializer='he_normal',
                   name='dense2')(concatenate([gru_2, gru_2b]))
     y_pred = Activation('softmax', name='softmax')(inner)
-    Model(inputs=input_data, outputs=y_pred).summary()
+    # Model(inputs=input_data, outputs=y_pred).summary()
 
     labels = Input(name='the_labels', shape=[img_gen.absolute_max_string_len], dtype='float32')
     input_length = Input(name='input_length', shape=[1], dtype='int64')
@@ -533,9 +570,8 @@ def train(run_name, start_epoch, stop_epoch, img_w):
                         initial_epoch=start_epoch)
 
 
-# testFunction()
 if __name__ == '__main__':
     run_name = datetime.datetime.now().strftime('%Y:%m:%d:%H:%M:%S')
-    train(run_name, 0, 20, 128)
+    train(run_name, 0, 40, 128)
     # increase to wider images and start at epoch 20. The learned weights are reloaded
 # train(run_name, 20, 25, 512)
