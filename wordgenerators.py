@@ -87,7 +87,7 @@ def GenerateRandomBanglaCharsWithModifierAndPunctuation(num_words):
 
     for i in range(num_words):
         string = ""
-        NumberOfAlphabet = random.randint(1, 4)
+        NumberOfAlphabet = random.randint(1, 3)
         for j in range(NumberOfAlphabet):
 
             WithModifier_or_WithNoModifier = random.randint(0, 1)
@@ -103,7 +103,7 @@ def GenerateRandomBanglaCharsWithModifierAndPunctuation(num_words):
         punrand=random.randint(0,5)
         string+=puncuation[punrand]
 
-        NumberOfAlphabet = random.randint(1, 4)
+        NumberOfAlphabet = random.randint(1, 3)
         for j in range(NumberOfAlphabet):
 
             WithModifier_or_WithNoModifier = random.randint(0, 1)
