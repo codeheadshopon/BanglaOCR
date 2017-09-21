@@ -556,8 +556,8 @@ if __name__ == '__main__':
     '''For Bangla'''
     lang="Bangla"
     # type="onlybanglachars"
-    # type="banglacharswithmodifer"
-    type="banglacharswithmodifierwithpunctuation"
+    type="banglacharswithmodifer"
+    # type="banglacharswithmodifierwithpunctuation"
 
     '''For English'''
     # lang="English"
