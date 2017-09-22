@@ -458,7 +458,7 @@ class VizCallback(keras.callbacks.Callback):
 def train(run_name, start_epoch, stop_epoch, img_w,type,lang):
     # Input Parameters
     img_h = 64
-    words_per_epoch = 800
+    words_per_epoch = 8000
     val_split = 0.2
     val_words = int(words_per_epoch * (val_split))
 
