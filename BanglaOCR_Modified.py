@@ -197,13 +197,13 @@ class TextImageGenerator(keras.callbacks.Callback):
         self.bigram_file = bigram_file
         self.downsample_factor = downsample_factor
         self.val_split = val_split
-        self.blank_label = self.get_output_size() - 1
         self.type = type
         self.lang=lang
+
+        self.blank_label = FindOutPutShape(self.lang) - 1
         self.absolute_max_string_len = absolute_max_string_len
 
-    def get_output_size(self):
-        return 52
+    
 
     # num_words can be independent of the epoch size due to the use of generators
     # as max_string_len grows, num_words can grow
@@ -375,7 +375,7 @@ def decode_batch(test_func, word_batch,lang):
             # 26 is space, 27 is CTC blank char
             outstr = ''
             for c in out_best:
-                if(c!=57):
+                if(c!=58):
                     outstr += Total[c]
             ret.append(outstr)
             print(outstr)
@@ -403,11 +403,12 @@ def decode_batch(test_func, word_batch,lang):
 
 class VizCallback(keras.callbacks.Callback):
 
-    def __init__(self, run_name, test_func, text_img_gen, num_display_words=6):
+    def __init__(self, run_name, test_func, text_img_gen, lang,num_display_words=6):
         self.test_func = test_func
         self.output_dir = os.path.join(
             OUTPUT_DIR, run_name)
         self.text_img_gen = text_img_gen
+        self.lang=lang
         self.num_display_words = num_display_words
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
@@ -434,7 +435,7 @@ class VizCallback(keras.callbacks.Callback):
         self.model.save_weights(os.path.join(self.output_dir, 'weights%02d.h5' % (epoch)))
         # self.show_edit_distance(256)
         word_batch = next(self.text_img_gen)[0]
-        res = decode_batch(self.test_func, word_batch['the_input'][0:self.num_display_words])
+        res = decode_batch(self.test_func, word_batch['the_input'][0:self.num_display_words],lang)
         if word_batch['the_input'][0].shape[0] < 256:
             cols = 2
         else:
@@ -457,7 +458,7 @@ class VizCallback(keras.callbacks.Callback):
 def train(run_name, start_epoch, stop_epoch, img_w,type,lang):
     # Input Parameters
     img_h = 64
-    words_per_epoch = 8000
+    words_per_epoch = 800
     val_split = 0.2
     val_words = int(words_per_epoch * (val_split))
 
@@ -556,8 +557,8 @@ if __name__ == '__main__':
     '''For Bangla'''
     lang="Bangla"
     # type="onlybanglachars"
-    type="banglacharswithmodifer"
-    # type="banglacharswithmodifierwithpunctuation"
+    # type="banglacharswithmodifer"
+    type="banglacharswithmodifierwithpunctuation"
 
     '''For English'''
     # lang="English"
