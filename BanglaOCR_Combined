@@ -245,7 +245,7 @@ def text_to_labels(text, lang):
 class TextImageGenerator(keras.callbacks.Callback):
     def __init__(self, monogram_file, bigram_file, minibatch_size,
                  img_w, img_h, downsample_factor, val_split, type, lang,
-                 absolute_max_string_len=25):
+                 absolute_max_string_len=30):
 
         self.minibatch_size = minibatch_size
         self.img_w = img_w
@@ -295,8 +295,8 @@ class TextImageGenerator(keras.callbacks.Callback):
         for i, word in enumerate(self.string_list):
             wordlen = len(text_to_labels(word, lang))
             self.Y_len[i] = wordlen
-            print(word)
-            print(wordlen)
+            # print(word)
+            # print(wordlen)
             # print((self.Y_len[i]))
 
             self.Y_data[i, 0:wordlen] = text_to_labels(word, lang)
@@ -371,7 +371,7 @@ class TextImageGenerator(keras.callbacks.Callback):
             yield ret
 
     def on_train_begin(self, logs={}):
-        self.build_word_list(8000, 4, 1)
+        self.build_word_list(16000, 4, 1)
         self.paint_func = lambda text: paint_text(text, self.img_w, self.img_h,
                                                   rotate=False, ud=False, multi_fonts=False)
 
@@ -554,11 +554,10 @@ class VizCallback(keras.callbacks.Callback):
         pylab.savefig(os.path.join(self.output_dir, 'e%02d.png' % (epoch)))
         pylab.close()
 
-
 def train(run_name, start_epoch, stop_epoch, img_w, type, lang):
     # Input Parameters
     img_h = 64
-    words_per_epoch = 8000
+    words_per_epoch = 16000
     val_split = 0.2
     val_words = int(words_per_epoch * (val_split))
 
@@ -643,7 +642,7 @@ def train(run_name, start_epoch, stop_epoch, img_w, type, lang):
     test_func = K.function([input_data], [y_pred])
 
     viz_cb = VizCallback(run_name, test_func, img_gen.next_val(), lang)
-
+    model.load_weights('weights11.h5')
     model.fit_generator(generator=img_gen.next_train(),
                         steps_per_epoch=(words_per_epoch - val_words) // minibatch_size,
                         epochs=stop_epoch,
@@ -670,6 +669,6 @@ if __name__ == '__main__':
     lang="combined"
     type="combined"
 
-    train(run_name, 0, 40, 256, type, lang)
+    train(run_name, 0, 150, 256, type, lang)
     # increase to wider images and start at epoch 20. The learned weights are reloaded
 # train(run_name, 20, 25, 512)
