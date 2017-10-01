@@ -658,7 +658,9 @@ def train(run_name, start_epoch, stop_epoch, img_w, type, lang):
     data = getTestData()
 
     last_layer = Model(inputs=input_data,outputs=model.get_layer('softmax').output)
-
+    last_layer.compile(loss='categorical_crossentropy',
+                  optimizer=sgd,
+                  metrics=['accuracy']) 
     Output =last_layer.predict(data)
 
 
