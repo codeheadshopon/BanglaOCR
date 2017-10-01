@@ -343,15 +343,17 @@ class TextImageGenerator(keras.callbacks.Callback):
                 input_length[i] = self.img_w // self.downsample_factor - 2
                 label_length[i] = self.Y_len[index + i]
                 source_str.append(self.X_text[index + i])
-        inputs = {'the_input': X_data,
+        inputs = {
+                  'the_input': X_data,
                   'the_labels': labels,
                   'input_length': input_length,
                   'label_length': label_length,
                   'source_str': source_str  # used for visualization only
-                  }
-        print(labels.shape)
-        print(input_length.shape)
-        print(label_length.shape)
+                 }
+        print(X_data[0].shape)
+        print(labels[0])
+        print(input_length[0])
+        print(label_length[0])
 
         outputs = {'ctc': np.zeros([size])}  # dummy data for dummy loss function
         return (inputs, outputs)
@@ -492,6 +494,7 @@ def decode_batch(test_func, word_batch, lang):
             upperchar.append(chr(i))
 
         Total = charlist + modlist + punc + lowerchar + upperchar
+
         out = test_func([word_batch])[0]
         ret = []
         for j in range(out.shape[0]):
@@ -557,6 +560,13 @@ class VizCallback(keras.callbacks.Callback):
         fig.set_size_inches(10, 13)
         pylab.savefig(os.path.join(self.output_dir, 'e%02d.png' % (epoch)))
         pylab.close()
+def getTestData():
+    img = cv2.imread('Test_Img.png')
+    # img=cv2.resize(img,(256,64))
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    img = np.array(img)
+    data = np.reshape(img, (1, 256, 64, 1))
+    return data
 
 def train(run_name, start_epoch, stop_epoch, img_w, type, lang):
     # Input Parameters
@@ -630,45 +640,33 @@ def train(run_name, start_epoch, stop_epoch, img_w, type, lang):
     # Keras doesn't currently support loss funcs with extra parameters
     # so CTC loss is implemented in a lambda layer
     loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([y_pred, labels, input_length, label_length])
-
     # clipnorm seems to speeds up convergence
     sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 
     model = Model(inputs=[input_data, labels, input_length, label_length], outputs=loss_out)
 
-    # the loss calc occurs elsewhere, so use a dummy lambda func for the loss
-    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
     model.summary()
-    if start_epoch > 0:
-        weight_file = os.path.join(OUTPUT_DIR, os.path.join(run_name, 'weights%02d.h5' % (start_epoch - 1)))
-        model.load_weights(weight_file)
-    # captures output of softmax so we can decode the output during visualization
+
     test_func = K.function([input_data], [y_pred])
 
     viz_cb = VizCallback(run_name, test_func, img_gen.next_val(), lang)
+
+    model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
+
     model.load_weights('weights11.h5')
-   
-    img = cv2.imread('Test_Img.png')
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    img = np.array(img)
-    # img = np.reshape(img, (1, 256, 64, 1))
-    print(img.shape)
-    data=[]
-    for i in range(32):
-        data.append(img)
-    data=np.asarray(data)
-    data=np.reshape(data,(32,256,64,1))
 
-    labels = np.zeros([32, 30])
-    input_length = np.ones([32, 1])
-    label_length = np.ones([32, 1])
+    data = getTestData()
+
+    last_layer = Model(inputs=input_data,outputs=model.get_layer('softmax').output)
+
+    Output =last_layer.predict(data)
 
 
-    result=model.predict([data,labels,input_length,label_length])
-
-    print(result.shape)
-    print(result[0])
-
+    for j in range(len(Output[0])):
+        it=max(Output[0][j])
+        for i in range(len(Output[0][j])):
+            if(Output[0][j][i]==it):
+                print(i)
 
 
 if __name__ == '__main__':
