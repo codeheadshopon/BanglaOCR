@@ -685,12 +685,15 @@ def train(run_name, start_epoch, stop_epoch, img_w, type, lang):
     model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 
 
-    data = getTestData()
+    img = cv2.imread('Test_Img.png')
+    # img=cv2.resize(img,(256,64))
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    img = np.array(img)
     # res=test_func([data])
-    plt.imshow(data,cmap='gray')
+    plt.imshow(img,cmap='gray')
     plt.show()
 
-    data = np.reshape(data, (1, 256, 64, 1))
+    data = np.reshape(img, (1, 256, 64, 1))
     Total=totalList()
 
     out = test_func([data])[0]
