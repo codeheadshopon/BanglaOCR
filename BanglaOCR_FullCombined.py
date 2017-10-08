@@ -496,8 +496,8 @@ def train(run_name, start_epoch, stop_epoch, img_w, typess, lang):
     fdir = os.path.dirname(get_file('wordlists.tgz',
                                     origin='http://www.mythic-ai.com/datasets/wordlists.tgz', untar=True))
 
-    img_gen = TextImageGenerator(monogram_file=os.path.join('bangla_wordlist_mono_clean.txt'),
-                                 bigram_file=os.path.join(fdir, 'wordlist_bi_clean.txt'),
+    img_gen = TextImageGenerator(monogram_file="",
+                                 bigram_file="",
                                  minibatch_size=minibatch_size,
                                  img_w=img_w,
                                  img_h=img_h,
