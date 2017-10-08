@@ -21,7 +21,6 @@ def GenerateRandomBanglaCharsOnly(num_words):
             Character=random.randint(0,45)
             string+=charlist[Character]
         stringlist.append(string)
-        # print(string)
     return stringlist
 def GenerateRandomBanglaCharsWithModifier(num_words):
 
@@ -122,7 +121,7 @@ def GenerateRandomBanglaCharsWithModifierAndPunctuation(num_words):
                 indexofchar = random.choice(allowed_values)
                 indexofmodifier = random.randint(0, 5)
                 string += (charlist[indexofchar] + modlist[indexofmodifier])
-        print(string)
+        
         stringlist.append(string)
     return stringlist
 def GenerateRandomEnglishLowerChars(num_words):
@@ -133,7 +132,7 @@ def GenerateRandomEnglishLowerChars(num_words):
         for j in range(NumberofChars):
             ind = random.randint(0,25)
             string+=chr(97+ind)
-        print(string)
+        p
         stringlist.append(string)
     return stringlist
 
@@ -145,7 +144,7 @@ def GenerateRandomEnglishUpperChars(num_words):
         for j in range(NumberofChars):
             ind = random.randint(0, 25)
             string += chr(65 + ind)
-        print(string)
+        
         stringlist.append(string)
     return stringlist
 def Jointchars():
@@ -239,7 +238,6 @@ def getTotalData():
         charlist.append(banglachars[i * 3:(i + 1) * 3])
     C = 0
     for i in range(0, 19, 4):
-        # print(i)
         modlist.append(modifiers[i:i + 3])
 
     lowerchar = []
@@ -250,7 +248,6 @@ def getTotalData():
     for i in range(65, 91):
         upperchar.append(chr(i))
 
-    # print(len(modlist))
     Joint = Jointchars()
 
     Total = charlist + modlist + Joint + punc + lowerchar + upperchar
@@ -273,7 +270,6 @@ def Makestr():
 
     String=""
     BanglaOrEnglishOrPunc=random.randint(0,1)
-    # print(BanglaOrEnglishOrPunc)
     if(BanglaOrEnglishOrPunc==0):
         NormalOrPunc=random.randint(0,3) # Punctuation or Normal Character
         if(NormalOrPunc==3):
@@ -312,13 +308,11 @@ def Makestr():
 def decodetheData(string):
     Index = {}
     C = 0
-    print(string)
     Total=getTotalData()
     for i in Total:
         Index[i] = C
         C += 1
     i=0
-    print(len(Total))
     labels=[]
     while i<len(string):
         isJoint=0
@@ -350,7 +344,7 @@ def decodetheData(string):
                     i+=1
                     labels.append(Index[x])
                     break
-    print(labels)
+    
     return labels
 
 
