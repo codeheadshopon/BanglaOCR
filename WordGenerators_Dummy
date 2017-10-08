@@ -328,11 +328,21 @@ allowed_for_ko=[11,15,38,40,41]
 
 
 #Jukto গ
-allowed_for_ko=[13,28,29,30,33]
+allowed_for_go=[13,28,29,30,33]
 
 
-#Jukto গ
-allowed_for_ko=[13,28,29,30,33]
+#Jukto cho
+allowed_for_cho=[16,18,20,21,24,25,31,38,39,]
+
+#Jukto To - Taka
+allowed_for_ko=[11,12,13,16,19,21,25,26,31,33,35,38,39,40,41]
+
+
+#Jukto Do - Dab
+allowed_for_Tho=[12,13,16,23,25,30,38,39]
+
+#Jukto po
+allowed_for_Tho=[31,38,41,39]
 
 
 for j in range(len(charlist)):
@@ -340,6 +350,6 @@ for j in range(len(charlist)):
     print("----------")
     for i in range(len(charlist)):
         print(i)
-        print(charlist[j]+hosh+charlist[i])
+        print(charlist[i]+hosh+charlist[j])
     print("End of ",)
     print(charlist[j])
